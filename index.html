@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -956,27 +956,29 @@
 
             <div id="registerErrorMsg" style="display: none; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px;"></div>
 
-            <div class="form-group">
-                <label>Họ và tên của bạn (*)</label>
-                <input type="text" id="regName" placeholder="Nhập họ và tên...">
-            </div>
-            <div class="form-group">
-                <label>Số điện thoại (dùng đăng nhập) (*)</label>
-                <input type="text" id="regPhone" placeholder="Nhập số điện thoại...">
-            </div>
-            <div class="form-group">
-                <label>Mật khẩu (*)</label>
-                <input type="password" id="regPassword" placeholder="Tạo mật khẩu...">
-            </div>
+            <form onsubmit="event.preventDefault(); handleRegister();">
+                <div class="form-group">
+                    <label>Họ và tên của bạn (*)</label>
+                    <input type="text" id="regName" autocomplete="name" placeholder="Nhập họ và tên...">
+                </div>
+                <div class="form-group">
+                    <label>Số điện thoại (dùng đăng nhập) (*)</label>
+                    <input type="text" id="regPhone" autocomplete="username" placeholder="Nhập số điện thoại...">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu (*)</label>
+                    <input type="password" id="regPassword" autocomplete="new-password" placeholder="Tạo mật khẩu...">
+                </div>
 
-            <div style="margin-bottom: 14px; text-align: right; font-size: 13px;">
-                Đã có tài khoản? <a href="#" onclick="openLoginModal()" style="color: #2563eb; font-weight: 700; text-decoration: underline;">Đăng nhập ngay</a>
-            </div>
+                <div style="margin-bottom: 14px; text-align: right; font-size: 13px;">
+                    Đã có tài khoản? <a href="#" onclick="openLoginModal()" style="color: #2563eb; font-weight: 700; text-decoration: underline;">Đăng nhập ngay</a>
+                </div>
 
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeAllModals()">Hủy</button>
-                <button class="btn-confirm" onclick="handleRegister()">Tạo tài khoản & Đăng nhập</button>
-            </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeAllModals()">Hủy</button>
+                    <button type="submit" class="btn-confirm">Tạo tài khoản & Đăng nhập</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -990,23 +992,25 @@
 
             <div id="loginErrorMsg" style="display: none; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px;"></div>
 
-            <div class="form-group">
-                <label>Số điện thoại / Tên tài khoản (*)</label>
-                <input type="text" id="loginUsername" placeholder="Nhập SĐT hoặc tên tài khoản...">
-            </div>
-            <div class="form-group">
-                <label>Mật khẩu (*)</label>
-                <input type="password" id="loginPassword" placeholder="Nhập mật khẩu...">
-            </div>
+            <form onsubmit="event.preventDefault(); handleLogin();">
+                <div class="form-group">
+                    <label>Số điện thoại / Tên tài khoản (*)</label>
+                    <input type="text" id="loginUsername" autocomplete="username" placeholder="Nhập SĐT hoặc tên tài khoản...">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu (*)</label>
+                    <input type="password" id="loginPassword" autocomplete="current-password" placeholder="Nhập mật khẩu...">
+                </div>
 
-            <div style="margin-bottom: 14px; text-align: right; font-size: 13px;">
-                Chưa có tài khoản? <a href="#" onclick="openRegisterModal()" style="color: #2563eb; font-weight: 700; text-decoration: underline;">Đăng ký tài khoản mới ngay</a>
-            </div>
+                <div style="margin-bottom: 14px; text-align: right; font-size: 13px;">
+                    Chưa có tài khoản? <a href="#" onclick="openRegisterModal()" style="color: #2563eb; font-weight: 700; text-decoration: underline;">Đăng ký tài khoản mới ngay</a>
+                </div>
 
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeAllModals()">Hủy</button>
-                <button class="btn-confirm" onclick="handleLogin()">Đăng nhập ngay</button>
-            </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeAllModals()">Hủy</button>
+                    <button type="submit" class="btn-confirm">Đăng nhập ngay</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1738,7 +1742,7 @@
                 return;
             }
 
-            const foundAcc = registeredAccounts.find(a => a.phone === userVal || a.name.toLowerCase() === userVal.toLowerCase());
+            const foundAcc = registeredAccounts.find(a => a.phone === userVal || a.name?.toLowerCase() === userVal.toLowerCase());
             
             if (!foundAcc) {
                 // Yêu cầu 2: Báo lỗi đỏ nổi bật nếu chưa có tài khoản
