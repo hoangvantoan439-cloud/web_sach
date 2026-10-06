@@ -1809,32 +1809,13 @@
         }
 
         // -------------------------------------------------------------
-        // GIỎ HÀNG & THANH TOÁN YÊU CẦU ĐĂNG NHẬP
+        // THANH TOÁN (KHÔNG YÊU CẦU ĐĂNG NHẬP)
         // -------------------------------------------------------------
-        function addToCart(bookId) {
-            if (!currentUser) {
-                showToast('⚠️ Bạn cần Đăng Nhập hoặc Đăng Ký tài khoản trước khi chọn mua!');
-                openLoginModal();
-                return;
-            }
-            const book = bookDatabase.find(b => b.id === bookId);
-            if(!book) return;
-            const exist = cart.find(c => c.id === bookId);
-            if(exist) exist.qty++;
-            else cart.push({ id: book.id, name: book.name, price: book.price, img: book.img, qty: 1 });
-            saveCart();
-            showToast(`🛒 Đã thêm "${book.name}" vào giỏ hàng!`);
-        }
 
         let activeCouponDiscount = 0;
         let activeCouponCode = "";
 
         function openCheckoutModalFromCart() {
-            if (!currentUser) {
-                showToast('⚠️ Bạn cần Đăng Nhập hoặc Đăng Ký tài khoản trước khi thanh toán!');
-                openLoginModal();
-                return;
-            }
             if (cart.length === 0) {
                 showToast('⚠️ Giỏ hàng của bạn đang trống!');
                 return;
@@ -1842,9 +1823,9 @@
 
             closeAllModals();
 
-            // Auto-fill customer info
-            document.getElementById('chkName').value = currentUser.name || '';
-            document.getElementById('chkPhone').value = currentUser.phone || '';
+            // Auto-fill customer info if logged in
+            document.getElementById('chkName').value = currentUser ? currentUser.name : '';
+            document.getElementById('chkPhone').value = currentUser ? (currentUser.phone || '') : '';
 
             // Reset coupon state
             activeCouponDiscount = 0;
