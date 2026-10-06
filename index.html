@@ -611,10 +611,10 @@
             <a class="nav-item" onclick="showToast('📞 Hotline liên hệ: 1900 8888 - Email: hotro@booknest.vn')">Liên hệ</a>
         </nav>
 
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Tìm kiếm hơn 120+ sách & giáo trình (VD: Toán 1, Triết học, OOP...)" onkeyup="if(event.key==='Enter') executeSearch()">
-            <button onclick="executeSearch()">🔍</button>
-        </div>
+        <form class="search-container" onsubmit="event.preventDefault(); executeSearch(); return false;">
+            <input type="text" id="searchInput" placeholder="Tìm kiếm hơn 120+ sách & giáo trình (VD: Toán 1, Triết học, OOP...)">
+            <button type="submit">🔍</button>
+        </form>
 
         <div class="header-actions">
             <button class="header-btn" id="btnLoginNav" onclick="openLoginModal()">
