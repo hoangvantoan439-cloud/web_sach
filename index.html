@@ -956,7 +956,7 @@
 
             <div id="registerErrorMsg" style="display: none; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px;"></div>
 
-            <form onsubmit="event.preventDefault(); handleRegister();">
+            <form onsubmit="event.preventDefault(); handleRegister(); return false;">
                 <div class="form-group">
                     <label>Họ và tên của bạn (*)</label>
                     <input type="text" id="regName" autocomplete="name" placeholder="Nhập họ và tên...">
@@ -992,7 +992,7 @@
 
             <div id="loginErrorMsg" style="display: none; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px;"></div>
 
-            <form onsubmit="event.preventDefault(); handleLogin();">
+            <form onsubmit="event.preventDefault(); handleLogin(); return false;">
                 <div class="form-group">
                     <label>Số điện thoại / Tên tài khoản (*)</label>
                     <input type="text" id="loginUsername" autocomplete="username" placeholder="Nhập SĐT hoặc tên tài khoản...">
