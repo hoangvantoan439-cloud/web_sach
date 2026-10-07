@@ -216,7 +216,7 @@
 
         function initDatabase() {
             bookDatabase = [...bestsellersData];
-            idCounter = 1;
+            idCounter = bestsellersData.length + 1;
 
             // SÁCH CẤP 1 (LỚP 1 -> LỚP 5): 7 MÔN x 5 LỚP = 35 CUỐN
             const cap1Subs = ["Toán", "Tiếng Việt", "Đạo đức", "Âm nhạc", "Tiếng Anh", "Tin học", "Khoa học xã hội"];
