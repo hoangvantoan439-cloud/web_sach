@@ -434,15 +434,15 @@
                 let defaultAccounts = [
             { name: "Nguyễn Văn An", phone: "0912345678", pass: "123456" },
             { name: "Trần Thị Mai", phone: "0987654321", pass: "123456" },
-            { name: "toàn", phone: "toan123", pass: "12345" }
+            { name: "toan", phone: "toan", pass: "12345" }
         ];
 
         if (registeredAccounts.length === 0) {
             registeredAccounts = defaultAccounts;
             localStorage.setItem('booknest_accounts', JSON.stringify(registeredAccounts));
         } else {
-            if (!registeredAccounts.find(a => a.name === "toàn")) {
-                registeredAccounts.push({ name: "toàn", phone: "toan123", pass: "12345" });
+            if (!registeredAccounts.find(a => a.name === "toan")) {
+                registeredAccounts.push({ name: "toan", phone: "toan", pass: "12345" });
                 localStorage.setItem('booknest_accounts', JSON.stringify(registeredAccounts));
             }
         }
