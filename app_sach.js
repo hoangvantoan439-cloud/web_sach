@@ -1155,6 +1155,32 @@ private:
                 </div>`).join('');
         }
 
+        // Hỗ trợ kiểm thử tự động (Automation Test Helper)
+        function quickFillLogin(user = 'thanh', pass = '123456') {
+            const u = document.getElementById('loginUsername');
+            const p = document.getElementById('loginPassword');
+            if (u) { u.value = user; u.dispatchEvent(new Event('input', { bubbles: true })); }
+            if (p) { p.value = pass; p.dispatchEvent(new Event('input', { bubbles: true })); }
+        }
+
+        function quickFillRegister(name = 'tien', phone = '', pass = '123456') {
+            const n = document.getElementById('regName');
+            const ph = document.getElementById('regPhone');
+            const p = document.getElementById('regPassword');
+            if (n) { n.value = name; n.dispatchEvent(new Event('input', { bubbles: true })); }
+            if (ph) { ph.value = phone || ('09' + Math.floor(10000000 + Math.random() * 90000000)); ph.dispatchEvent(new Event('input', { bubbles: true })); }
+            if (p) { p.value = pass; p.dispatchEvent(new Event('input', { bubbles: true })); }
+        }
+
+        function quickFillCheckout(name = 'Nguyễn Văn Tiến', phone = '0988776655', address = '123 Cầu Giấy, Hà Nội') {
+            const n = document.getElementById('chkName');
+            const ph = document.getElementById('chkPhone');
+            const a = document.getElementById('chkAddress');
+            if (n) { n.value = name; n.dispatchEvent(new Event('input', { bubbles: true })); }
+            if (ph) { ph.value = phone; ph.dispatchEvent(new Event('input', { bubbles: true })); }
+            if (a) { a.value = address; a.dispatchEvent(new Event('input', { bubbles: true })); }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             initDatabase();
             renderBestsellers();

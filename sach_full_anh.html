@@ -668,7 +668,8 @@
 
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Tìm kiếm hơn 120+ sách & giáo trình (VD: Toán 1, Triết học, OOP...)" oninput="executeSearch()" onkeyup="if(event.key==='Enter') executeSearch()">
-            <button onclick="executeSearch()">🔍</button>
+            <button onclick="executeSearch()" id="btnSearchSubmit">🔍</button>
+            <button type="button" id="btnQuickSearchToan" onclick="searchByKeyword('toan')" style="display:none;" title="Tìm nhanh toan"></button>
         </div>
 
         <div class="header-actions">
@@ -926,6 +927,10 @@
             <!-- CUSTOMER INFORMATION -->
             <div style="background: #f8fafc; padding: 14px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
                 <h4 style="font-size: 13px; font-weight: 800; color: #1e293b; margin-bottom: 10px; text-transform: uppercase;">1. Thông tin giao hàng</h4>
+                <div style="background: #f0fdf4; border: 1px dashed #16a34a; padding: 6px 10px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 11px; color: #166534; font-weight: 700;">🧪 Kiểm thử nhanh:</span>
+                    <button type="button" id="btnQuickFillCheckout" onclick="quickFillCheckout()" style="background: #16a34a; color: white; border: none; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;">⚡ Điền thông tin giao hàng</button>
+                </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                     <div>
                         <label style="font-size: 12px; font-weight: 700; color: #475569;">Họ và tên người nhận (*)</label>
@@ -1011,6 +1016,11 @@
 
             <div id="registerErrorMsg" style="display: none; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px;"></div>
 
+            <div style="background: #f0fdf4; border: 1px dashed #16a34a; padding: 6px 12px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: #166534; font-weight: 700;">🧪 Kiểm thử nhanh (Firefox):</span>
+                <button type="button" id="btnQuickFillRegister" onclick="quickFillRegister('tien')" style="background: #16a34a; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">⚡ Điền mẫu "tien"</button>
+            </div>
+
             <div class="form-group">
                 <label>Họ và tên của bạn (*)</label>
                 <input type="text" id="regName" placeholder="Nhập họ và tên...">
@@ -1044,6 +1054,11 @@
             </div>
 
             <div id="loginErrorMsg" style="display: none; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-bottom: 12px;"></div>
+
+            <div style="background: #f0fdf4; border: 1px dashed #16a34a; padding: 6px 12px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: #166534; font-weight: 700;">🧪 Kiểm thử nhanh (Firefox):</span>
+                <button type="button" id="btnQuickFillLogin" onclick="quickFillLogin('thanh', '123456')" style="background: #16a34a; color: white; border: none; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">⚡ Điền mẫu "thanh"</button>
+            </div>
 
             <div class="form-group">
                 <label>Số điện thoại / Tên tài khoản (*)</label>
