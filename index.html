@@ -9,6 +9,60 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
     
+    <!-- Polyfill tương thích cho Selenium IDE (khắc phục lỗi n.createEvent(...).initKeyEvent is not a function trên Firefox) -->
+    <script>
+        (function() {
+            try {
+                function patchInitKeyEvent(target) {
+                    if (!target) return;
+                    if (!target.initKeyEvent) {
+                        target.initKeyEvent = function(type, bubbles, cancelable, viewArg, ctrlKeyArg, altKeyArg, shiftKeyArg, metaKeyArg, keyCodeArg, charCodeArg) {
+                            try {
+                                Object.defineProperty(this, 'type', { get: function() { return type; }, configurable: true });
+                                Object.defineProperty(this, 'bubbles', { get: function() { return !!bubbles; }, configurable: true });
+                                Object.defineProperty(this, 'cancelable', { get: function() { return !!cancelable; }, configurable: true });
+                                Object.defineProperty(this, 'view', { get: function() { return viewArg || window; }, configurable: true });
+                                Object.defineProperty(this, 'ctrlKey', { get: function() { return !!ctrlKeyArg; }, configurable: true });
+                                Object.defineProperty(this, 'altKey', { get: function() { return !!altKeyArg; }, configurable: true });
+                                Object.defineProperty(this, 'shiftKey', { get: function() { return !!shiftKeyArg; }, configurable: true });
+                                Object.defineProperty(this, 'metaKey', { get: function() { return !!metaKeyArg; }, configurable: true });
+                                Object.defineProperty(this, 'keyCode', { get: function() { return keyCodeArg || 0; }, configurable: true });
+                                Object.defineProperty(this, 'charCode', { get: function() { return charCodeArg || 0; }, configurable: true });
+                                Object.defineProperty(this, 'which', { get: function() { return keyCodeArg || charCodeArg || 0; }, configurable: true });
+                            } catch(e) {}
+                        };
+                    }
+                }
+
+                if (typeof KeyboardEvent !== 'undefined') patchInitKeyEvent(KeyboardEvent.prototype);
+                if (typeof UIEvent !== 'undefined') patchInitKeyEvent(UIEvent.prototype);
+                if (typeof Event !== 'undefined') patchInitKeyEvent(Event.prototype);
+
+                var origCreateEvent = Document.prototype.createEvent || document.createEvent;
+                if (origCreateEvent) {
+                    var safeCreateEvent = function(eventType) {
+                        var ev;
+                        try {
+                            ev = origCreateEvent.apply(this, arguments);
+                        } catch (err) {
+                            try {
+                                ev = origCreateEvent.call(this, 'CustomEvent');
+                            } catch (e2) {
+                                ev = {};
+                            }
+                        }
+                        patchInitKeyEvent(ev);
+                        return ev;
+                    };
+                    Document.prototype.createEvent = safeCreateEvent;
+                    document.createEvent = safeCreateEvent;
+                }
+            } catch (err) {
+                console.warn("Selenium IDE polyfill error:", err);
+            }
+        })();
+    </script>
+    
     <style>
         :root {
             
@@ -622,7 +676,7 @@
         </nav>
 
         <form class="search-container" onsubmit="event.preventDefault(); executeSearch(); return false;">
-            <input type="text" id="searchInput" placeholder="Tìm kiếm hơn 120+ sách & giáo trình (VD: Toán 1, Triết học, OOP...)">
+            <input type="text" id="searchInput" placeholder="Tìm kiếm hơn 120+ sách & giáo trình (VD: Toán 1, Triết học, OOP...)" oninput="executeSearch()">
             <button type="submit">🔍</button>
         </form>
 
