@@ -600,13 +600,38 @@
                 return;
             }
 
-            const coupon = mockCoupons.find(c => c.code === codeInput);
-            if (!coupon) {
+            // ĐIỀU KIỆN 1: Tổng giá trị đơn hàng phải từ 500.000 đồng trở lên.
+            if (subtotal < 500000) {
+                activeCouponCode = "";
+                activeCouponDiscount = 0;
+                updateCheckoutPriceSummary();
                 feedback.style.color = "#dc2626";
-                feedback.innerText = `❌ Mã "${codeInput}" không hợp lệ hoặc đã hết hạn!`;
+                feedback.innerText = `❌ Điều kiện 1 không thỏa mãn: Tổng giá trị đơn hàng phải từ 500.000đ trở lên mới được áp dụng mã giảm giá (Hiện tại: ${subtotal.toLocaleString('vi-VN')}đ)!`;
                 return;
             }
 
+            // ĐIỀU KIỆN 2: Mã giảm giá phải tồn tại trong hệ thống.
+            const coupon = mockCoupons.find(c => c.code.toUpperCase() === codeInput);
+            if (!coupon) {
+                activeCouponCode = "";
+                activeCouponDiscount = 0;
+                updateCheckoutPriceSummary();
+                feedback.style.color = "#dc2626";
+                feedback.innerText = `❌ Điều kiện 2 không thỏa mãn: Mã giảm giá "${codeInput}" không tồn tại trong hệ thống!`;
+                return;
+            }
+
+            // ĐIỀU KIỆN 3: Mã giảm giá phải còn hiệu lực.
+            if (coupon.status !== "Đang hiệu lực") {
+                activeCouponCode = "";
+                activeCouponDiscount = 0;
+                updateCheckoutPriceSummary();
+                feedback.style.color = "#dc2626";
+                feedback.innerText = `❌ Điều kiện 3 không thỏa mãn: Mã giảm giá "${coupon.code}" đã hết hiệu lực!`;
+                return;
+            }
+
+            // KẾT QUẢ: Chỉ khi tất cả điều kiện đều được thỏa mãn, hệ thống mới cho phép áp dụng mã giảm giá
             activeCouponCode = coupon.code;
             if (coupon.discount.includes('%')) {
                 const percent = parseInt(coupon.discount);
@@ -618,12 +643,21 @@
             }
 
             feedback.style.color = "#16a34a";
-            feedback.innerText = `✅ Đã áp dụng mã "${coupon.code}" (${coupon.desc}) - Giảm ${activeCouponDiscount.toLocaleString('vi-VN')}đ!`;
+            feedback.innerText = `✅ Đã áp dụng thành công mã "${coupon.code}" (${coupon.desc}) - Giảm ${activeCouponDiscount.toLocaleString('vi-VN')}đ!`;
             updateCheckoutPriceSummary();
         }
 
         function updateCheckoutPriceSummary() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            if (activeCouponCode && subtotal < 500000) {
+                activeCouponDiscount = 0;
+                activeCouponCode = "";
+                const feedback = document.getElementById('chkCouponFeedback');
+                if (feedback) {
+                    feedback.style.color = "#dc2626";
+                    feedback.innerText = "⚠️ Mã giảm giá đã bị hủy do tổng đơn hàng dưới 500.000đ!";
+                }
+            }
             const shippingFee = subtotal > 0 ? 30000 : 0;
             const finalTotal = Math.max(0, subtotal + shippingFee - activeCouponDiscount);
 
@@ -679,9 +713,10 @@
         ];
 
         let mockCoupons = [
-            { code: "BOOKNEST10", discount: "10%", desc: "Giảm 10% cho mọi đơn hàng", status: "Đang hiệu lực" },
-            { code: "HE2026", discount: "20.000đ", desc: "Giảm 20k đơn từ 150k", status: "Đang hiệu lực" },
-            { code: "FREESHIP", discount: "Freeship", desc: "Miễn phí vận chuyển toàn quốc", status: "Đang hiệu lực" }
+            { code: "BOOKNEST10", discount: "10%", desc: "Giảm 10% cho đơn từ 500.000đ", status: "Đang hiệu lực" },
+            { code: "HE2026", discount: "50.000đ", desc: "Giảm 50k cho đơn từ 500.000đ", status: "Đang hiệu lực" },
+            { code: "FREESHIP", discount: "Freeship", desc: "Miễn phí vận chuyển cho đơn từ 500.000đ", status: "Đang hiệu lực" },
+            { code: "HETHAN", discount: "30%", desc: "Mã giảm giá đã hết hạn", status: "Hết hiệu lực" }
         ];
 
         function openAdminModal() {
@@ -901,14 +936,25 @@
         function renderAdminCouponsTable() {
             const tbody = document.getElementById('adminCouponsTableBody');
             if (!tbody) return;
-            tbody.innerHTML = mockCoupons.map(c => `
+            tbody.innerHTML = mockCoupons.map((c, idx) => `
                 <tr>
                     <td><strong style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:4px;">${c.code}</strong></td>
                     <td><strong style="color:#dc2626;">${c.discount}</strong></td>
                     <td>${c.desc}</td>
-                    <td><span style="color:#16a34a; font-weight:700;">${c.status}</span></td>
+                    <td>
+                        <select onchange="updateCouponStatus(${idx}, this.value)" style="padding: 4px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700; color: ${c.status === 'Đang hiệu lực' ? '#16a34a' : '#dc2626'};">
+                            <option value="Đang hiệu lực" ${c.status === 'Đang hiệu lực' ? 'selected' : ''}>Đang hiệu lực</option>
+                            <option value="Hết hiệu lực" ${c.status === 'Hết hiệu lực' ? 'selected' : ''}>Hết hiệu lực</option>
+                        </select>
+                    </td>
                 </tr>
             `).join('');
+        }
+
+        function updateCouponStatus(idx, newStatus) {
+            mockCoupons[idx].status = newStatus;
+            showToast(`🎟️ Đã cập nhật trạng thái mã ${mockCoupons[idx].code} thành "${newStatus}"`);
+            renderAdminCouponsTable();
         }
 
         function addCouponFromAdmin() {
