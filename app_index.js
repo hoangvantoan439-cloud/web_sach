@@ -600,8 +600,8 @@
                 return;
             }
 
-            // ĐIỀU KIỆN 1: Tổng giá trị đơn hàng phải từ 500.000 đồng trở lên.
-            if (subtotal < 500000) {
+            // ĐIỀU KIỆN 1: Tổng giá trị đơn hàng phải từ 150.000 đồng trở lên.
+            if (subtotal < 150000) {
                 activeCouponCode = "";
                 activeCouponDiscount = 0;
                 updateCheckoutPriceSummary();
@@ -609,8 +609,8 @@
                 feedback.innerHTML = `
                     <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:8px 10px; line-height:1.5;">
                         <div style="font-weight:800; color:#b91c1c;">❌ KHÔNG THỂ ÁP DỤNG MÃ GIẢM GIÁ:</div>
-                        <div>❌ <strong>Điều kiện 1 KHÔNG thỏa mãn:</strong> Tổng giá trị đơn hàng phải từ <strong>500.000đ</strong> trở lên (Hiện tại: <span style="color:#b91c1c; font-weight:700;">${subtotal.toLocaleString('vi-VN')}đ</span>).</div>
-                        <div style="color:#64748b; font-size:11px; margin-top:2px;">(Bạn cần mua thêm ít nhất ${(500000 - subtotal).toLocaleString('vi-VN')}đ để đủ điều kiện áp dụng mã).</div>
+                        <div>❌ <strong>Điều kiện 1 KHÔNG thỏa mãn:</strong> Tổng giá trị đơn hàng phải từ <strong>150.000đ</strong> trở lên (Hiện tại: <span style="color:#b91c1c; font-weight:700;">${subtotal.toLocaleString('vi-VN')}đ</span>).</div>
+                        <div style="color:#64748b; font-size:11px; margin-top:2px;">(Bạn cần mua thêm ít nhất ${(150000 - subtotal).toLocaleString('vi-VN')}đ để đủ điều kiện áp dụng mã).</div>
                     </div>`;
                 return;
             }
@@ -625,7 +625,7 @@
                 feedback.innerHTML = `
                     <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:8px 10px; line-height:1.5;">
                         <div style="font-weight:800; color:#b91c1c;">❌ KHÔNG THỂ ÁP DỤNG MÃ GIẢM GIÁ:</div>
-                        <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 500.000đ).</div>
+                        <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 150.000đ).</div>
                         <div>❌ <strong>Điều kiện 2 KHÔNG thỏa mãn:</strong> Mã giảm giá "<strong>${codeInput}</strong>" không tồn tại trong hệ thống!</div>
                     </div>`;
                 return;
@@ -640,7 +640,7 @@
                 feedback.innerHTML = `
                     <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:8px 10px; line-height:1.5;">
                         <div style="font-weight:800; color:#b91c1c;">❌ KHÔNG THỂ ÁP DỤNG MÃ GIẢM GIÁ:</div>
-                        <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 500.000đ).</div>
+                        <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 150.000đ).</div>
                         <div>✅ <strong>Điều kiện 2:</strong> Mã "<strong>${coupon.code}</strong>" tồn tại trong hệ thống.</div>
                         <div>❌ <strong>Điều kiện 3 KHÔNG thỏa mãn:</strong> Mã giảm giá "<strong>${coupon.code}</strong>" đã hết hiệu lực (${coupon.status})!</div>
                     </div>`;
@@ -662,7 +662,7 @@
             feedback.innerHTML = `
                 <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:8px 10px; line-height:1.5;">
                     <div style="font-weight:800; color:#15803d;">🎉 KẾT QUẢ: CẢ 3 ĐIỀU KIỆN ĐỀU ĐƯỢC THỎA MÃN!</div>
-                    <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 500.000đ).</div>
+                    <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 150.000đ).</div>
                     <div>✅ <strong>Điều kiện 2:</strong> Mã "<strong>${coupon.code}</strong>" tồn tại trong hệ thống.</div>
                     <div>✅ <strong>Điều kiện 3:</strong> Mã còn hiệu lực (Đang hiệu lực).</div>
                     <div style="margin-top:4px; font-weight:800; color:#16a34a;">➡️ Đã áp dụng mã "${coupon.code}" (${coupon.desc}) - Giảm ${activeCouponDiscount.toLocaleString('vi-VN')}đ!</div>
@@ -672,13 +672,13 @@
 
         function updateCheckoutPriceSummary() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            if (activeCouponCode && subtotal < 500000) {
+            if (activeCouponCode && subtotal < 150000) {
                 activeCouponDiscount = 0;
                 activeCouponCode = "";
                 const feedback = document.getElementById('chkCouponFeedback');
                 if (feedback) {
                     feedback.style.color = "#dc2626";
-                    feedback.innerHTML = '<div style="color:#dc2626; font-weight:700;">⚠️ Mã giảm giá đã bị hủy do tổng đơn hàng dưới 500.000đ!</div>';
+                    feedback.innerHTML = '<div style="color:#dc2626; font-weight:700;">⚠️ Mã giảm giá đã bị hủy do tổng đơn hàng dưới 150.000đ!</div>';
                 }
             }
             const shippingFee = subtotal > 0 ? 30000 : 0;
@@ -707,7 +707,7 @@
             // Tái kiểm tra điều kiện mã giảm giá trước khi hoàn tất đặt hàng
             if (activeCouponCode) {
                 const coupon = mockCoupons.find(c => c.code.toUpperCase() === activeCouponCode);
-                if (subtotal < 500000 || !coupon || coupon.status !== "Đang hiệu lực") {
+                if (subtotal < 150000 || !coupon || coupon.status !== "Đang hiệu lực") {
                     activeCouponCode = "";
                     activeCouponDiscount = 0;
                     updateCheckoutPriceSummary();
@@ -751,9 +751,9 @@
         ];
 
         let mockCoupons = [
-            { code: "BOOKNEST10", discount: "10%", desc: "Giảm 10% cho đơn từ 500.000đ", status: "Đang hiệu lực" },
-            { code: "HE2026", discount: "50.000đ", desc: "Giảm 50k cho đơn từ 500.000đ", status: "Đang hiệu lực" },
-            { code: "FREESHIP", discount: "Freeship", desc: "Miễn phí vận chuyển cho đơn từ 500.000đ", status: "Đang hiệu lực" },
+            { code: "BOOKNEST10", discount: "10%", desc: "Giảm 10% cho đơn từ 150.000đ", status: "Đang hiệu lực" },
+            { code: "HE2026", discount: "20.000đ", desc: "Giảm 20k cho đơn từ 150.000đ", status: "Đang hiệu lực" },
+            { code: "FREESHIP", discount: "Freeship", desc: "Miễn phí vận chuyển cho đơn từ 150.000đ", status: "Đang hiệu lực" },
             { code: "HETHAN", discount: "30%", desc: "Mã giảm giá đã hết hạn", status: "Hết hiệu lực" }
         ];
 
