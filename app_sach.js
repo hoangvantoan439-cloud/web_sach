@@ -596,7 +596,7 @@
 
             if (!codeInput) {
                 feedback.style.color = "#dc2626";
-                feedback.innerText = "❌ Vui lòng nhập mã giảm giá!";
+                feedback.innerHTML = "❌ <strong>Vui lòng nhập mã giảm giá!</strong>";
                 return;
             }
 
@@ -606,7 +606,12 @@
                 activeCouponDiscount = 0;
                 updateCheckoutPriceSummary();
                 feedback.style.color = "#dc2626";
-                feedback.innerText = `❌ Điều kiện 1 không thỏa mãn: Tổng giá trị đơn hàng phải từ 500.000đ trở lên mới được áp dụng mã giảm giá (Hiện tại: ${subtotal.toLocaleString('vi-VN')}đ)!`;
+                feedback.innerHTML = `
+                    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:8px 10px; line-height:1.5;">
+                        <div style="font-weight:800; color:#b91c1c;">❌ KHÔNG THỂ ÁP DỤNG MÃ GIẢM GIÁ:</div>
+                        <div>❌ <strong>Điều kiện 1 KHÔNG thỏa mãn:</strong> Tổng giá trị đơn hàng phải từ <strong>500.000đ</strong> trở lên (Hiện tại: <span style="color:#b91c1c; font-weight:700;">${subtotal.toLocaleString('vi-VN')}đ</span>).</div>
+                        <div style="color:#64748b; font-size:11px; margin-top:2px;">(Bạn cần mua thêm ít nhất ${(500000 - subtotal).toLocaleString('vi-VN')}đ để đủ điều kiện áp dụng mã).</div>
+                    </div>`;
                 return;
             }
 
@@ -617,7 +622,12 @@
                 activeCouponDiscount = 0;
                 updateCheckoutPriceSummary();
                 feedback.style.color = "#dc2626";
-                feedback.innerText = `❌ Điều kiện 2 không thỏa mãn: Mã giảm giá "${codeInput}" không tồn tại trong hệ thống!`;
+                feedback.innerHTML = `
+                    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:8px 10px; line-height:1.5;">
+                        <div style="font-weight:800; color:#b91c1c;">❌ KHÔNG THỂ ÁP DỤNG MÃ GIẢM GIÁ:</div>
+                        <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 500.000đ).</div>
+                        <div>❌ <strong>Điều kiện 2 KHÔNG thỏa mãn:</strong> Mã giảm giá "<strong>${codeInput}</strong>" không tồn tại trong hệ thống!</div>
+                    </div>`;
                 return;
             }
 
@@ -627,7 +637,13 @@
                 activeCouponDiscount = 0;
                 updateCheckoutPriceSummary();
                 feedback.style.color = "#dc2626";
-                feedback.innerText = `❌ Điều kiện 3 không thỏa mãn: Mã giảm giá "${coupon.code}" đã hết hiệu lực!`;
+                feedback.innerHTML = `
+                    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:8px 10px; line-height:1.5;">
+                        <div style="font-weight:800; color:#b91c1c;">❌ KHÔNG THỂ ÁP DỤNG MÃ GIẢM GIÁ:</div>
+                        <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 500.000đ).</div>
+                        <div>✅ <strong>Điều kiện 2:</strong> Mã "<strong>${coupon.code}</strong>" tồn tại trong hệ thống.</div>
+                        <div>❌ <strong>Điều kiện 3 KHÔNG thỏa mãn:</strong> Mã giảm giá "<strong>${coupon.code}</strong>" đã hết hiệu lực (${coupon.status})!</div>
+                    </div>`;
                 return;
             }
 
@@ -643,7 +659,14 @@
             }
 
             feedback.style.color = "#16a34a";
-            feedback.innerText = `✅ Đã áp dụng thành công mã "${coupon.code}" (${coupon.desc}) - Giảm ${activeCouponDiscount.toLocaleString('vi-VN')}đ!`;
+            feedback.innerHTML = `
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:8px 10px; line-height:1.5;">
+                    <div style="font-weight:800; color:#15803d;">🎉 KẾT QUẢ: CẢ 3 ĐIỀU KIỆN ĐỀU ĐƯỢC THỎA MÃN!</div>
+                    <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 500.000đ).</div>
+                    <div>✅ <strong>Điều kiện 2:</strong> Mã "<strong>${coupon.code}</strong>" tồn tại trong hệ thống.</div>
+                    <div>✅ <strong>Điều kiện 3:</strong> Mã còn hiệu lực (Đang hiệu lực).</div>
+                    <div style="margin-top:4px; font-weight:800; color:#16a34a;">➡️ Đã áp dụng mã "${coupon.code}" (${coupon.desc}) - Giảm ${activeCouponDiscount.toLocaleString('vi-VN')}đ!</div>
+                </div>`;
             updateCheckoutPriceSummary();
         }
 
@@ -655,7 +678,7 @@
                 const feedback = document.getElementById('chkCouponFeedback');
                 if (feedback) {
                     feedback.style.color = "#dc2626";
-                    feedback.innerText = "⚠️ Mã giảm giá đã bị hủy do tổng đơn hàng dưới 500.000đ!";
+                    feedback.innerHTML = '<div style="color:#dc2626; font-weight:700;">⚠️ Mã giảm giá đã bị hủy do tổng đơn hàng dưới 500.000đ!</div>';
                 }
             }
             const shippingFee = subtotal > 0 ? 30000 : 0;
@@ -680,6 +703,19 @@
             }
 
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            // Tái kiểm tra điều kiện mã giảm giá trước khi hoàn tất đặt hàng
+            if (activeCouponCode) {
+                const coupon = mockCoupons.find(c => c.code.toUpperCase() === activeCouponCode);
+                if (subtotal < 500000 || !coupon || coupon.status !== "Đang hiệu lực") {
+                    activeCouponCode = "";
+                    activeCouponDiscount = 0;
+                    updateCheckoutPriceSummary();
+                    showToast('❌ Mã giảm giá không thỏa mãn đủ 3 điều kiện nên đã bị hủy!');
+                    return;
+                }
+            }
+
             const finalTotal = Math.max(0, subtotal + 30000 - activeCouponDiscount);
 
             const orderCode = "ORD-" + Math.floor(1000 + Math.random() * 9000);
@@ -693,6 +729,8 @@
             });
 
             cart = [];
+            activeCouponCode = "";
+            activeCouponDiscount = 0;
             saveCart();
             closeAllModals();
             showToast(`🎉 Đặt hàng thành công! Mã đơn: ${orderCode}. Cảm ơn khách hàng ${name}!`);
