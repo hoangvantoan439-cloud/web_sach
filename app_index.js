@@ -657,6 +657,17 @@
                 return;
             }
 
+            // Kiểm tra định dạng số điện thoại hợp lệ (chỉ là 10 số)
+            if (!/^[0-9]{10}$/.test(phone)) {
+                if (!/^\d+$/.test(phone)) {
+                    errDiv.innerText = '❌ Số điện thoại không hợp lệ! Số điện thoại chỉ được chứa các chữ số (0-9).';
+                } else {
+                    errDiv.innerText = `❌ Số điện thoại không hợp lệ! Số điện thoại phải gồm đúng 10 chữ số (Hiện có ${phone.length} số).`;
+                }
+                errDiv.style.display = 'block';
+                return;
+            }
+
             const exist = registeredAccounts.find(a => a.phone === phone);
             if (exist) {
                 errDiv.innerText = '❌ Số điện thoại này đã được đăng ký tài khoản! Vui lòng đăng nhập.';
@@ -839,6 +850,16 @@
 
             if (!name || !phone || !addr) {
                 showToast('⚠️ Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ giao hàng!');
+                return;
+            }
+
+            // Kiểm tra định dạng số điện thoại hợp lệ (chỉ là 10 số)
+            if (!/^[0-9]{10}$/.test(phone)) {
+                if (!/^\d+$/.test(phone)) {
+                    showToast('❌ Số điện thoại giao hàng không hợp lệ! Chỉ được chứa các chữ số (0-9).');
+                } else {
+                    showToast(`❌ Số điện thoại giao hàng không hợp lệ! Phải gồm đúng 10 chữ số (Hiện có ${phone.length} số).`);
+                }
                 return;
             }
 
