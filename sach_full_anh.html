@@ -778,7 +778,7 @@
         <div class="promo-card promo-card-2">
             <div class="promo-info">
                 <h3>Miễn phí vận chuyển</h3>
-                <p>Cho đơn hàng từ 150.000đ</p>
+                <p>Cho đơn hàng từ 500.000đ</p>
                 <button class="promo-btn" onclick="scrollToSection('catalogSection')">Xem chi tiết ➔</button>
             </div>
             <span style="font-size: 60px;">🚚</span>
@@ -909,6 +909,10 @@
     <div id="cartModal" class="modal">
         <div class="modal-content" style="width: 650px; max-width: 95vw;">
             <div class="modal-header"><h3>🛒 Giỏ hàng của bạn</h3><span onclick="closeAllModals()" style="cursor:pointer; font-size:20px; font-weight:800;">✕</span></div>
+            <div id="cartTipMsg" style="background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; font-size:12px; font-weight:700; padding:8px 12px; border-radius:8px; margin-bottom:12px;">
+                💡 <strong>Mẹo:</strong> Bạn có thể <strong>nhấp đúp chuột (Double Click)</strong> vào ô số lượng sách để gõ sửa số lượng trực tiếp (số lượng phải lớn hơn 0).
+            </div>
+            <div id="cartErrorMsg" style="display:none; color:#dc2626; background:#fef2f2; border:1px solid #fecaca; padding:8px 12px; border-radius:8px; font-size:12px; font-weight:700; margin-bottom:12px;"></div>
             <div id="cartItemsList" style="max-height: 340px; overflow-y: auto; margin-bottom: 16px;"></div>
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: 800; margin-bottom: 16px; border-top: 1px solid #e2e8f0; padding-top: 12px;"><span>Tổng tiền:</span><span id="cartTotalPrice" style="color: #dc2626;">0 đ</span></div>
             <div class="modal-actions"><button class="btn-cancel" onclick="closeAllModals()">Đóng</button><button class="btn-confirm" onclick="openCheckoutModalFromCart()">Thanh toán ngay</button></div>
@@ -975,7 +979,7 @@
                 <!-- BẢNG ĐIỀU KIỆN SỬ DỤNG MÃ GIẢM GIÁ -->
                 <div style="background: #ffffff; border: 1px solid #86efac; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; font-size: 12px; line-height: 1.6; color: #1e293b;">
                     <div style="font-weight: 800; color: #15803d; margin-bottom: 4px;">📋 ĐIỀU KIỆN ÁP DỤNG MÃ GIẢM GIÁ:</div>
-                    <div>🔹 <strong>Điều kiện 1:</strong> Tổng giá trị đơn hàng phải từ <strong>150.000 đồng</strong> trở lên.</div>
+                    <div>🔹 <strong>Điều kiện 1:</strong> Tổng giá trị đơn hàng phải từ <strong>500.000 đồng</strong> trở lên.</div>
                     <div>🔹 <strong>Điều kiện 2:</strong> Mã giảm giá phải <strong>tồn tại</strong> trong hệ thống.</div>
                     <div>🔹 <strong>Điều kiện 3:</strong> Mã giảm giá phải <strong>còn hiệu lực</strong>.</div>
                     <div style="color: #047857; font-weight: 800; margin-top: 6px; border-top: 1px dashed #bbf7d0; padding-top: 4px;">

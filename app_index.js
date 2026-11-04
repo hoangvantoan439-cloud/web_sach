@@ -501,6 +501,89 @@
             }
         }
 
+        function enableEditCartQty(bookId) {
+            const item = cart.find(c => c.id === bookId);
+            if (!item) return;
+            const container = document.getElementById(`cartQtyBox_${bookId}`);
+            if (!container) return;
+
+            container.innerHTML = `
+                <div style="display:flex; align-items:center; gap:4px;">
+                    <input type="text" id="cartQtyInput_${bookId}" value="${item.qty}"
+                           style="width:55px; text-align:center; font-weight:800; font-size:13px; padding:3px 4px; border:2px solid #2563eb; border-radius:4px; outline:none;"
+                           onkeydown="if(event.key==='Enter') saveEditedCartQty(${bookId})"
+                           placeholder="SL">
+                    <button onclick="saveEditedCartQty(${bookId})"
+                            style="background:#16a34a; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:700; font-size:11px; cursor:pointer;"
+                            title="Xác nhận số lượng">Lưu</button>
+                    <button onclick="openCartModal()"
+                            style="background:#64748b; color:white; border:none; padding:4px 6px; border-radius:4px; font-weight:700; font-size:11px; cursor:pointer;"
+                            title="Hủy bỏ">✕</button>
+                </div>
+            `;
+            const input = document.getElementById(`cartQtyInput_${bookId}`);
+            if (input) {
+                input.focus();
+                input.select();
+            }
+        }
+
+        function saveEditedCartQty(bookId) {
+            const inputEl = document.getElementById(`cartQtyInput_${bookId}`);
+            if (!inputEl) return;
+            const rawVal = inputEl.value.trim();
+            const item = cart.find(c => c.id === bookId);
+            if (!item) return;
+            const book = bookDatabase.find(b => b.id === bookId);
+            const stock = book ? ((book.stock !== undefined) ? book.stock : 50) : 0;
+            const errBox = document.getElementById('cartErrorMsg');
+
+            // 1. Kiểm tra để trống hoặc không phải định dạng số nguyên
+            if (rawVal === "" || !/^-?\d+$/.test(rawVal)) {
+                const msg = `❌ Số lượng sách không hợp lệ! Vui lòng chỉ nhập số nguyên (Bạn đã nhập: "${rawVal}"). Vui lòng nhập lại!`;
+                if (errBox) { errBox.innerText = msg; errBox.style.display = 'block'; }
+                showToast(msg);
+                inputEl.style.border = "2px solid #dc2626";
+                inputEl.style.background = "#fef2f2";
+                inputEl.focus();
+                inputEl.select();
+                return;
+            }
+
+            const parsedQty = parseInt(rawVal, 10);
+
+            // 2. Yêu cầu của người dùng: Nhập số lượng phải lớn hơn 0. Vẫn cho nhập số lượng âm, khi nhập xong sẽ thông báo lỗi và cho nhập lại!
+            if (parsedQty <= 0) {
+                const msg = `❌ Số lượng sách phải lớn hơn 0! Bạn đã nhập: ${parsedQty} (số lượng ${parsedQty < 0 ? 'âm' : 'bằng 0'} không hợp lệ). Vui lòng nhập lại số lượng!`;
+                if (errBox) { errBox.innerText = msg; errBox.style.display = 'block'; }
+                showToast(msg);
+                inputEl.style.border = "2px solid #dc2626";
+                inputEl.style.background = "#fef2f2";
+                inputEl.focus();
+                inputEl.select();
+                return;
+            }
+
+            // 3. Kiểm tra số lượng vượt quá tồn kho
+            if (parsedQty > stock) {
+                const msg = `❌ Không đủ hàng trong kho! Cuốn sách "${item.name}" trong kho chỉ còn ${stock} cuốn (Bạn đã nhập: ${parsedQty} cuốn). Vui lòng nhập lại số lượng!`;
+                if (errBox) { errBox.innerText = msg; errBox.style.display = 'block'; }
+                showToast(msg);
+                inputEl.style.border = "2px solid #dc2626";
+                inputEl.style.background = "#fef2f2";
+                inputEl.focus();
+                inputEl.select();
+                return;
+            }
+
+            // Hợp lệ: Cập nhật số lượng và tính lại giỏ hàng
+            if (errBox) { errBox.style.display = 'none'; }
+            item.qty = parsedQty;
+            saveCart();
+            openCartModal();
+            showToast(`✅ Đã cập nhật số lượng cuốn sách "${item.name}" thành ${parsedQty} cuốn!`);
+        }
+
         function clearCart() {
             if (cart.length === 0) return;
             cart = [];
@@ -511,6 +594,8 @@
 
         function openCartModal() {
             closeAllModals();
+            const errBox = document.getElementById('cartErrorMsg');
+            if (errBox) { errBox.style.display = 'none'; }
             const list = document.getElementById('cartItemsList');
             if(cart.length === 0) {
                 list.innerHTML = `
@@ -534,9 +619,14 @@
                                 <span style="color:${bookStock > 0 ? '#16a34a' : '#dc2626'}; font-weight:700;">Kho còn: ${bookStock} cuốn</span>
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                        <div id="cartQtyBox_${item.id}" style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
                             <button onclick="decreaseCartQty(${item.id})" style="width:28px; height:28px; border-radius:6px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; cursor:pointer; color:#334155; font-size:14px;" title="Giảm số lượng">-</button>
-                            <span style="min-width:24px; text-align:center; font-weight:800; font-size:13px;">${item.qty}</span>
+                            <span id="cartQtySpan_${item.id}"
+                                  ondblclick="enableEditCartQty(${item.id})"
+                                  title="Nhấp đúp chuột để gõ sửa số lượng sách"
+                                  style="min-width:32px; text-align:center; font-weight:800; font-size:13px; cursor:pointer; padding:3px 6px; border-radius:4px; border:1px dashed #3b82f6; background:#eff6ff; color:#1d4ed8; user-select:none;">
+                                ${item.qty}
+                            </span>
                             <button onclick="increaseCartQty(${item.id})" style="width:28px; height:28px; border-radius:6px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; cursor:pointer; color:#334155; font-size:14px;" title="Tăng số lượng">+</button>
                         </div>
                         <div style="text-align:right; flex-shrink:0; min-width:85px;">
@@ -657,14 +747,19 @@
                 return;
             }
 
-            // Kiểm tra định dạng số điện thoại hợp lệ (chỉ là 10 số)
+            // Kiểm tra định dạng số điện thoại hợp lệ (chỉ chấp nhận 10 chữ số)
             if (!/^[0-9]{10}$/.test(phone)) {
                 if (!/^\d+$/.test(phone)) {
-                    errDiv.innerText = '❌ Số điện thoại không hợp lệ! Số điện thoại chỉ được chứa các chữ số (0-9).';
+                    errDiv.innerText = '❌ Số điện thoại không hợp lệ! Số điện thoại chỉ chấp nhận đúng 10 chữ số (0-9), không được chứa chữ cái hoặc ký tự đặc biệt. Vui lòng nhập lại!';
                 } else {
-                    errDiv.innerText = `❌ Số điện thoại không hợp lệ! Số điện thoại phải gồm đúng 10 chữ số (Hiện có ${phone.length} số).`;
+                    errDiv.innerText = `❌ Số điện thoại không hợp lệ! Số điện thoại phải gồm đúng 10 chữ số (Hiện tại bạn đã nhập ${phone.length} số). Vui lòng nhập lại!`;
                 }
                 errDiv.style.display = 'block';
+                const regInput = document.getElementById('regPhone');
+                if (regInput) {
+                    regInput.focus();
+                    regInput.select();
+                }
                 return;
             }
 
@@ -751,8 +846,8 @@
                 return;
             }
 
-            // ĐIỀU KIỆN 1: Tổng giá trị đơn hàng phải từ 150.000 đồng trở lên.
-            if (subtotal < 150000) {
+            // ĐIỀU KIỆN 1: Tổng giá trị đơn hàng phải từ 500.000 đồng trở lên.
+            if (subtotal < 500000) {
                 activeCouponCode = "";
                 activeCouponDiscount = 0;
                 updateCheckoutPriceSummary();
@@ -760,8 +855,8 @@
                 feedback.innerHTML = `
                     <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:8px 10px; line-height:1.5;">
                         <div style="font-weight:800; color:#b91c1c;">❌ KHÔNG THỂ ÁP DỤNG MÃ GIẢM GIÁ:</div>
-                        <div>❌ <strong>Điều kiện 1 KHÔNG thỏa mãn:</strong> Tổng giá trị đơn hàng phải từ <strong>150.000đ</strong> trở lên (Hiện tại: <span style="color:#b91c1c; font-weight:700;">${subtotal.toLocaleString('vi-VN')}đ</span>).</div>
-                        <div style="color:#64748b; font-size:11px; margin-top:2px;">(Bạn cần mua thêm ít nhất ${(150000 - subtotal).toLocaleString('vi-VN')}đ để đủ điều kiện áp dụng mã).</div>
+                        <div>❌ <strong>Điều kiện 1 KHÔNG thỏa mãn:</strong> Tổng giá trị đơn hàng phải từ <strong>500.000đ</strong> trở lên (Hiện tại: <span style="color:#b91c1c; font-weight:700;">${subtotal.toLocaleString('vi-VN')}đ</span>).</div>
+                        <div style="color:#64748b; font-size:11px; margin-top:2px;">(Bạn cần mua thêm ít nhất ${(500000 - subtotal).toLocaleString('vi-VN')}đ để đủ điều kiện áp dụng mã).</div>
                     </div>`;
                 return;
             }
@@ -776,7 +871,7 @@
                 feedback.innerHTML = `
                     <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:8px 10px; line-height:1.5;">
                         <div style="font-weight:800; color:#b91c1c;">❌ KHÔNG THỂ ÁP DỤNG MÃ GIẢM GIÁ:</div>
-                        <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 150.000đ).</div>
+                        <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 500.000đ).</div>
                         <div>❌ <strong>Điều kiện 2 KHÔNG thỏa mãn:</strong> Mã giảm giá "<strong>${codeInput}</strong>" không tồn tại trong hệ thống!</div>
                     </div>`;
                 return;
@@ -791,7 +886,7 @@
                 feedback.innerHTML = `
                     <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; padding:8px 10px; line-height:1.5;">
                         <div style="font-weight:800; color:#b91c1c;">❌ KHÔNG THỂ ÁP DỤNG MÃ GIẢM GIÁ:</div>
-                        <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 150.000đ).</div>
+                        <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 500.000đ).</div>
                         <div>✅ <strong>Điều kiện 2:</strong> Mã "<strong>${coupon.code}</strong>" tồn tại trong hệ thống.</div>
                         <div>❌ <strong>Điều kiện 3 KHÔNG thỏa mãn:</strong> Mã giảm giá "<strong>${coupon.code}</strong>" đã hết hiệu lực (${coupon.status})!</div>
                     </div>`;
@@ -813,7 +908,7 @@
             feedback.innerHTML = `
                 <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:8px 10px; line-height:1.5;">
                     <div style="font-weight:800; color:#15803d;">🎉 KẾT QUẢ: CẢ 3 ĐIỀU KIỆN ĐỀU ĐƯỢC THỎA MÃN!</div>
-                    <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 150.000đ).</div>
+                    <div>✅ <strong>Điều kiện 1:</strong> Đơn hàng đạt ${subtotal.toLocaleString('vi-VN')}đ (≥ 500.000đ).</div>
                     <div>✅ <strong>Điều kiện 2:</strong> Mã "<strong>${coupon.code}</strong>" tồn tại trong hệ thống.</div>
                     <div>✅ <strong>Điều kiện 3:</strong> Mã còn hiệu lực (Đang hiệu lực).</div>
                     <div style="margin-top:4px; font-weight:800; color:#16a34a;">➡️ Đã áp dụng mã "${coupon.code}" (${coupon.desc}) - Giảm ${activeCouponDiscount.toLocaleString('vi-VN')}đ!</div>
@@ -823,13 +918,13 @@
 
         function updateCheckoutPriceSummary() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            if (activeCouponCode && subtotal < 150000) {
+            if (activeCouponCode && subtotal < 500000) {
                 activeCouponDiscount = 0;
                 activeCouponCode = "";
                 const feedback = document.getElementById('chkCouponFeedback');
                 if (feedback) {
                     feedback.style.color = "#dc2626";
-                    feedback.innerHTML = '<div style="color:#dc2626; font-weight:700;">⚠️ Mã giảm giá đã bị hủy do tổng đơn hàng dưới 150.000đ!</div>';
+                    feedback.innerHTML = '<div style="color:#dc2626; font-weight:700;">⚠️ Mã giảm giá đã bị hủy do tổng đơn hàng dưới 500.000đ!</div>';
                 }
             }
             const shippingFee = subtotal > 0 ? 30000 : 0;
@@ -853,12 +948,17 @@
                 return;
             }
 
-            // Kiểm tra định dạng số điện thoại hợp lệ (chỉ là 10 số)
+            // Kiểm tra định dạng số điện thoại hợp lệ (chỉ chấp nhận 10 chữ số)
             if (!/^[0-9]{10}$/.test(phone)) {
                 if (!/^\d+$/.test(phone)) {
-                    showToast('❌ Số điện thoại giao hàng không hợp lệ! Chỉ được chứa các chữ số (0-9).');
+                    showToast('❌ Số điện thoại giao hàng không hợp lệ! Chỉ chấp nhận đúng 10 chữ số (0-9), không được chứa chữ cái hoặc ký tự đặc biệt. Vui lòng nhập lại!');
                 } else {
-                    showToast(`❌ Số điện thoại giao hàng không hợp lệ! Phải gồm đúng 10 chữ số (Hiện có ${phone.length} số).`);
+                    showToast(`❌ Số điện thoại giao hàng không hợp lệ! Phải gồm đúng 10 chữ số (Hiện tại bạn đã nhập ${phone.length} số). Vui lòng nhập lại!`);
+                }
+                const chkInput = document.getElementById('chkPhone');
+                if (chkInput) {
+                    chkInput.focus();
+                    chkInput.select();
                 }
                 return;
             }
@@ -887,7 +987,7 @@
             // Tái kiểm tra điều kiện mã giảm giá trước khi hoàn tất đặt hàng
             if (activeCouponCode) {
                 const coupon = mockCoupons.find(c => c.code.toUpperCase() === activeCouponCode);
-                if (subtotal < 150000 || !coupon || coupon.status !== "Đang hiệu lực") {
+                if (subtotal < 500000 || !coupon || coupon.status !== "Đang hiệu lực") {
                     activeCouponCode = "";
                     activeCouponDiscount = 0;
                     updateCheckoutPriceSummary();
@@ -947,9 +1047,9 @@
         ];
 
         let mockCoupons = [
-            { code: "BOOKNEST10", discount: "10%", desc: "Giảm 10% cho đơn từ 150.000đ", status: "Đang hiệu lực" },
-            { code: "HE2026", discount: "20.000đ", desc: "Giảm 20k cho đơn từ 150.000đ", status: "Đang hiệu lực" },
-            { code: "FREESHIP", discount: "Freeship", desc: "Miễn phí vận chuyển cho đơn từ 150.000đ", status: "Đang hiệu lực" },
+            { code: "BOOKNEST10", discount: "10%", desc: "Giảm 10% cho đơn từ 500.000đ", status: "Đang hiệu lực" },
+            { code: "HE2026", discount: "50.000đ", desc: "Giảm 50k cho đơn từ 500.000đ", status: "Đang hiệu lực" },
+            { code: "FREESHIP", discount: "Freeship", desc: "Miễn phí vận chuyển cho đơn từ 500.000đ", status: "Đang hiệu lực" },
             { code: "HETHAN", discount: "30%", desc: "Mã giảm giá đã hết hạn", status: "Hết hiệu lực" }
         ];
 
