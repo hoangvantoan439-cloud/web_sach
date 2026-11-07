@@ -1650,6 +1650,18 @@ private:
         window.executeSearch = executeSearch;
         window.debouncedSearch = debouncedSearch;
         window.searchByKeyword = searchByKeyword;
+        window.searchBook = searchByKeyword;
+        window.fillInput = function(id, value) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = value;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        };
+        window.quickFillLogin = quickFillLogin;
+        window.quickFillRegister = quickFillRegister;
+        window.quickFillCheckout = quickFillCheckout;
 
         function initApp() {
             initDatabase();
