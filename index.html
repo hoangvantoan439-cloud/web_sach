@@ -676,8 +676,8 @@
         </nav>
 
         <form class="search-container" onsubmit="event.preventDefault(); executeSearch(); return false;">
-            <input type="text" id="searchInput" placeholder="Tìm kiếm hơn 120+ sách & giáo trình (VD: Toán 1, Triết học, OOP...)" oninput="executeSearch()">
-            <button type="submit" id="btnSearchSubmit">🔍</button>
+            <input type="text" id="searchInput" placeholder="Tìm kiếm hơn 120+ sách & giáo trình (VD: Toán 1, Triết học, OOP...)" oninput="debouncedSearch()" onchange="executeSearch()" autocomplete="off">
+            <button type="submit" id="btnSearchSubmit" title="Tìm kiếm">🔍</button>
         </form>
 
         <div class="header-actions">

@@ -330,18 +330,18 @@
 
         function renderBooks(booksToRender) {
             const grid = document.getElementById('productGrid');
+            if (!grid) return;
             const countEl = document.getElementById('resultsCount');
             if(countEl) countEl.innerHTML = `Hiển thị <span class="results-count-badge">${booksToRender.length}</span> cuốn sách (Tổng kho: ${bookDatabase.length})`;
-            grid.innerHTML = '';
 
             if(booksToRender.length === 0) {
                 grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b; background: white; border-radius: 16px;">🔍 Không tìm thấy cuốn sách nào phù hợp.</div>`;
                 return;
             }
 
-            booksToRender.forEach(book => {
+            grid.innerHTML = booksToRender.map(book => {
                 const stock = (book.stock !== undefined) ? book.stock : 50;
-                grid.innerHTML += `
+                return `
                     <div class="book-card" onclick="openBookDetailModal(${book.id})">
                         <div class="book-cover-wrapper">
                             <img src="${book.img}" alt="${book.name}" loading="lazy" onerror="handleImageError(this, '${book.category || 'Giáo khoa'}')">
@@ -358,7 +358,7 @@
                         </div>
                         <button class="add-cart-mini-btn" onclick="event.stopPropagation(); addToCart(${book.id})" title="Thêm vào giỏ">🛒</button>
                     </div>`;
-            });
+            }).join('');
         }
 
         function removeAccents(str) {
@@ -366,11 +366,22 @@
             return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase().trim();
         }
 
+        let searchDebounceTimer = null;
+        function debouncedSearch() {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                executeSearch();
+            }, 80);
+        }
+
         function executeSearch() {
-            const keyword = removeAccents(document.getElementById('searchInput').value);
+            clearTimeout(searchDebounceTimer);
+            const searchEl = document.getElementById('searchInput');
+            const keyword = searchEl ? removeAccents(searchEl.value) : '';
             const selectedRadio = document.querySelector('.cat-filter:checked');
             const catVal = selectedRadio ? selectedRadio.value : '';
-            const sortVal = document.getElementById('sortSelect').value;
+            const sortEl = document.getElementById('sortSelect');
+            const sortVal = sortEl ? sortEl.value : 'default';
 
             let results = bookDatabase.filter(book => {
                 const matchKeyword = keyword === '' || removeAccents(book.name).includes(keyword) || removeAccents(book.category).includes(keyword);
@@ -1588,11 +1599,70 @@ private:
             if (a) { a.value = address; a.dispatchEvent(new Event('input', { bubbles: true })); }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
+        function setupSearchInputEvents() {
+            const sInput = document.getElementById('searchInput');
+            if (!sInput || sInput.dataset.searchHooked) return;
+            sInput.dataset.searchHooked = "true";
+
+            // 1. Khi người dùng gõ bàn phím -> tìm kiếm phản hồi nhanh, mượt mà (debounce 80ms)
+            sInput.addEventListener('input', debouncedSearch);
+
+            // 2. Khi Selenium IDE (lệnh type) hoặc browser thay đổi giá trị -> tìm kiếm ngay lập tức
+            sInput.addEventListener('change', executeSearch);
+
+            // 3. Khi bấm phím Enter -> tìm kiếm ngay lập tức
+            sInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    executeSearch();
+                }
+            });
+            sInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    executeSearch();
+                }
+            });
+
+            // 4. Khi paste hoặc clear
+            sInput.addEventListener('paste', () => setTimeout(executeSearch, 10));
+            sInput.addEventListener('search', executeSearch);
+
+            // 5. Trap setter cho thuộc tính .value để tương thích tuyệt đối với Selenium IDE / Test Script
+            try {
+                const origDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+                if (origDescriptor && origDescriptor.set) {
+                    Object.defineProperty(sInput, 'value', {
+                        set: function(val) {
+                            origDescriptor.set.call(this, val);
+                            executeSearch();
+                        },
+                        get: function() {
+                            return origDescriptor.get.call(this);
+                        },
+                        configurable: true
+                    });
+                }
+            } catch (err) {
+                console.warn("Search input setter hook error:", err);
+            }
+        }
+
+        window.executeSearch = executeSearch;
+        window.debouncedSearch = debouncedSearch;
+        window.searchByKeyword = searchByKeyword;
+
+        function initApp() {
             initDatabase();
             renderBestsellers();
             updateCartBadge();
             executeSearch();
             updateUserHeaderUI();
-        });
+            setupSearchInputEvents();
+        }
+
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
     
