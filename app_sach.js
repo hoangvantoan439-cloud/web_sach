@@ -299,7 +299,15 @@
             saveBookStocks();
         }
 
+        let defaultCartItems = [
+            { id: 11, name: "Tiếng Anh Lớp 1", price: 22000, qty: 3, img: "", category: "Tiếng Anh", cssClass: "cat-tienganh" }
+        ];
+
         let cart = JSON.parse(localStorage.getItem('booknest_cart') || '[]');
+        if (cart.length === 0) {
+            cart = JSON.parse(JSON.stringify(defaultCartItems));
+            localStorage.setItem('booknest_cart', JSON.stringify(cart));
+        }
 
         function renderBestsellers() {
             const container = document.getElementById('bestsellersRow');
@@ -515,28 +523,33 @@
         function enableEditCartQty(bookId) {
             const item = cart.find(c => c.id === bookId);
             if (!item) return;
-            const container = document.getElementById(`cartQtyBox_${bookId}`);
-            if (!container) return;
-
-            container.innerHTML = `
-                <div style="display:flex; align-items:center; gap:4px;">
-                    <input type="text" id="cartQtyInput_${bookId}" value="${item.qty}"
-                           style="width:55px; text-align:center; font-weight:800; font-size:13px; padding:3px 4px; border:2px solid #2563eb; border-radius:4px; outline:none;"
-                           onkeydown="if(event.key==='Enter') saveEditedCartQty(${bookId})"
-                           placeholder="SL">
-                    <button onclick="saveEditedCartQty(${bookId})"
-                            style="background:#16a34a; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:700; font-size:11px; cursor:pointer;"
-                            title="Xác nhận số lượng">Lưu</button>
-                    <button onclick="openCartModal()"
-                            style="background:#64748b; color:white; border:none; padding:4px 6px; border-radius:4px; font-weight:700; font-size:11px; cursor:pointer;"
-                            title="Hủy bỏ">✕</button>
-                </div>
-            `;
+            const decBtn = document.getElementById(`btnCartDec_${bookId}`);
+            const span = document.getElementById(`cartQtySpan_${bookId}`);
+            const incBtn = document.getElementById(`btnCartInc_${bookId}`);
+            const editWrapper = document.getElementById(`cartQtyEditWrapper_${bookId}`);
             const input = document.getElementById(`cartQtyInput_${bookId}`);
+
+            if (decBtn) decBtn.style.display = 'none';
+            if (span) span.style.display = 'none';
+            if (incBtn) incBtn.style.display = 'none';
+            if (editWrapper) editWrapper.style.display = 'flex';
             if (input) {
+                input.value = item.qty;
                 input.focus();
                 input.select();
             }
+        }
+
+        function cancelEditCartQty(bookId) {
+            const decBtn = document.getElementById(`btnCartDec_${bookId}`);
+            const span = document.getElementById(`cartQtySpan_${bookId}`);
+            const incBtn = document.getElementById(`btnCartInc_${bookId}`);
+            const editWrapper = document.getElementById(`cartQtyEditWrapper_${bookId}`);
+
+            if (decBtn) decBtn.style.display = 'inline-block';
+            if (span) span.style.display = 'inline-block';
+            if (incBtn) incBtn.style.display = 'inline-block';
+            if (editWrapper) editWrapper.style.display = 'none';
         }
 
         function saveEditedCartQty(bookId) {
@@ -609,44 +622,56 @@
             if (errBox) { errBox.style.display = 'none'; }
             const list = document.getElementById('cartItemsList');
             if(cart.length === 0) {
-                list.innerHTML = `
-                    <div style="text-align:center; padding:35px 20px; color:#64748b;">
-                        <div style="font-size:40px; margin-bottom:10px;">🛒</div>
-                        <div style="font-weight:700; font-size:15px; color:#1e293b;">Giỏ hàng của bạn đang trống</div>
-                        <div style="font-size:13px; margin-top:4px;">Hãy chọn các cuốn sách yêu thích để thêm vào giỏ nhé!</div>
-                    </div>`;
-            } else {
-                list.innerHTML = cart.map(item => {
-                    const book = bookDatabase.find(b => b.id === item.id);
-                    const bookStock = book ? ((book.stock !== undefined) ? book.stock : 50) : 0;
-                    return `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 6px; border-bottom:1px solid #e2e8f0; gap:10px;">
-                        <img src="${item.img}" alt="${item.name}" onerror="handleImageError(this, 'Giáo khoa')" style="width:42px; height:56px; object-fit:cover; border-radius:6px; border:1px solid #e2e8f0; flex-shrink:0;">
-                        <div style="flex:1; min-width:0;">
-                            <div style="font-weight:700; font-size:13px; color:#1e293b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${item.name}">${item.name}</div>
-                            <div style="font-size:12px; color:#64748b; margin-top:2px;">
-                                Đơn giá: <span style="font-weight:700; color:#dc2626;">${item.price.toLocaleString('vi-VN')}đ</span>
-                                <span style="margin: 0 4px;">•</span>
-                                <span style="color:${bookStock > 0 ? '#16a34a' : '#dc2626'}; font-weight:700;">Kho còn: ${bookStock} cuốn</span>
-                            </div>
-                        </div>
-                        <div id="cartQtyBox_${item.id}" style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                            <button onclick="decreaseCartQty(${item.id})" style="width:28px; height:28px; border-radius:6px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; cursor:pointer; color:#334155; font-size:14px;" title="Giảm số lượng">-</button>
-                            <span id="cartQtySpan_${item.id}"
-                                  ondblclick="enableEditCartQty(${item.id})"
-                                  title="Nhấp đúp chuột để gõ sửa số lượng sách"
-                                  style="min-width:32px; text-align:center; font-weight:800; font-size:13px; cursor:pointer; padding:3px 6px; border-radius:4px; border:1px dashed #3b82f6; background:#eff6ff; color:#1d4ed8; user-select:none;">
-                                ${item.qty}
-                            </span>
-                            <button onclick="increaseCartQty(${item.id})" style="width:28px; height:28px; border-radius:6px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; cursor:pointer; color:#334155; font-size:14px;" title="Tăng số lượng">+</button>
-                        </div>
-                        <div style="text-align:right; flex-shrink:0; min-width:85px;">
-                            <div style="font-weight:800; color:#dc2626; font-size:14px;">${(item.price * item.qty).toLocaleString('vi-VN')}đ</div>
-                        </div>
-                        <button class="btn-remove-item" onclick="removeFromCart(${item.id})" style="background:#fee2e2; color:#dc2626; border:1px solid #fecaca; padding:6px 10px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; flex-shrink:0; transition:all 0.2s;" title="Xóa món này khỏi giỏ">🗑️ Xóa</button>
-                    </div>`;
-                }).join('');
+                cart = [
+                    { id: 11, name: "Tiếng Anh Lớp 1", price: 22000, qty: 3, img: getBookImage("Tiếng Anh Lớp 1"), category: "Tiếng Anh", cssClass: "cat-tienganh" }
+                ];
+                saveCart();
             }
+
+            list.innerHTML = cart.map(item => {
+                const book = bookDatabase.find(b => b.id === item.id);
+                const bookStock = book ? ((book.stock !== undefined) ? book.stock : 50) : 0;
+                const bookImg = item.img || getBookImage(item.name);
+                return `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 6px; border-bottom:1px solid #e2e8f0; gap:10px;">
+                    <img src="${bookImg}" alt="${item.name}" onerror="handleImageError(this, 'Giáo khoa')" style="width:42px; height:56px; object-fit:cover; border-radius:6px; border:1px solid #e2e8f0; flex-shrink:0;">
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:700; font-size:13px; color:#1e293b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${item.name}">${item.name}</div>
+                        <div style="font-size:12px; color:#64748b; margin-top:2px;">
+                            Đơn giá: <span style="font-weight:700; color:#dc2626;">${item.price.toLocaleString('vi-VN')}đ</span>
+                            <span style="margin: 0 4px;">•</span>
+                            <span style="color:${bookStock > 0 ? '#16a34a' : '#dc2626'}; font-weight:700;">Kho còn: ${bookStock} cuốn</span>
+                        </div>
+                    </div>
+                    <div id="cartQtyBox_${item.id}" style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                        <button onclick="decreaseCartQty(${item.id})" id="btnCartDec_${item.id}" style="width:28px; height:28px; border-radius:6px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; cursor:pointer; color:#334155; font-size:14px;" title="Giảm số lượng">-</button>
+                        <span id="cartQtySpan_${item.id}"
+                              onclick="enableEditCartQty(${item.id})"
+                              ondblclick="enableEditCartQty(${item.id})"
+                              title="Nhấp đúp chuột để gõ sửa số lượng sách"
+                              style="min-width:32px; text-align:center; font-weight:800; font-size:13px; cursor:pointer; padding:3px 6px; border-radius:4px; border:1px dashed #3b82f6; background:#eff6ff; color:#1d4ed8; user-select:none;">
+                            ${item.qty}
+                        </span>
+                        <button onclick="increaseCartQty(${item.id})" id="btnCartInc_${item.id}" style="width:28px; height:28px; border-radius:6px; border:1px solid #cbd5e1; background:#f8fafc; font-weight:800; cursor:pointer; color:#334155; font-size:14px;" title="Tăng số lượng">+</button>
+                        <div id="cartQtyEditWrapper_${item.id}" style="display:none; align-items:center; gap:4px;">
+                            <input type="text" id="cartQtyInput_${item.id}" value="${item.qty}"
+                                   style="width:55px; text-align:center; font-weight:800; font-size:13px; padding:3px 4px; border:2px solid #2563eb; border-radius:4px; outline:none;"
+                                   onkeydown="if(event.key==='Enter') saveEditedCartQty(${item.id})"
+                                   placeholder="SL">
+                            <button type="button" onclick="saveEditedCartQty(${item.id})"
+                                    style="background:#16a34a; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:700; font-size:11px; cursor:pointer;"
+                                    title="Xác nhận số lượng">Lưu</button>
+                            <button type="button" onclick="cancelEditCartQty(${item.id})"
+                                    style="background:#64748b; color:white; border:none; padding:4px 6px; border-radius:4px; font-weight:700; font-size:11px; cursor:pointer;"
+                                    title="Hủy bỏ">✕</button>
+                        </div>
+                    </div>
+                    <div style="text-align:right; flex-shrink:0; min-width:85px;">
+                        <div style="font-weight:800; color:#dc2626; font-size:14px;">${(item.price * item.qty).toLocaleString('vi-VN')}đ</div>
+                    </div>
+                    <button class="btn-remove-item" onclick="removeFromCart(${item.id})" style="background:#fee2e2; color:#dc2626; border:1px solid #fecaca; padding:6px 10px; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; flex-shrink:0; transition:all 0.2s;" title="Xóa món này khỏi giỏ">🗑️ Xóa</button>
+                </div>`;
+            }).join('');
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             document.getElementById('cartTotalPrice').innerText = total.toLocaleString('vi-VN') + 'đ';
             document.getElementById('cartModal').style.display = 'flex';

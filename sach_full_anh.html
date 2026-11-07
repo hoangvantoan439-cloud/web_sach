@@ -675,10 +675,10 @@
             <button class="header-btn" id="btnLoginNav" onclick="openLoginModal()">
                 <span>👤</span> Đăng nhập / Đăng ký
             </button>
-            <button class="header-btn" onclick="openCartModal()">
-                <div class="cart-btn-wrapper">
-                    <span>🛒</span> Giỏ hàng <span class="cart-badge" id="cartBadge">0</span>
-                </div>
+            <button class="header-btn" id="btnOpenCartModal" onclick="openCartModal()">
+                <span class="cart-btn-wrapper" id="cartBtnWrapper" onclick="openCartModal()">
+                    <span>🛒</span> Giỏ hàng <span class="cart-badge" id="cartBadge" onclick="openCartModal()">0</span>
+                </span>
             </button>
             <button class="header-btn" id="btnAdminNav" onclick="openAdminModal()" style="color: #ef4444;" title="Quản trị viên">
                 ⚡ Admin
