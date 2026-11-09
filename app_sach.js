@@ -303,18 +303,12 @@
             saveBookStocks();
         }
 
-        let defaultCartItems = [
-            { id: 11, name: "Tiếng Anh Lớp 1", price: 22000, qty: 3, img: getCoverUrl("Tiếng Anh Lớp 1"), category: "Tiếng Anh", cssClass: "cat-tienganh" }
-        ];
-
         let cart = JSON.parse(localStorage.getItem('booknest_cart') || '[]');
-        if (!cart || cart.length === 0 || !cart.find(c => c.id === 11)) {
-            if (!cart) cart = [];
-            cart = [
-                { id: 11, name: "Tiếng Anh Lớp 1", price: 22000, qty: 3, img: getCoverUrl("Tiếng Anh Lớp 1"), category: "Tiếng Anh", cssClass: "cat-tienganh" },
-                ...cart.filter(c => c.id !== 11)
-            ];
-            localStorage.setItem('booknest_cart', JSON.stringify(cart));
+        // Ban đầu giỏ hàng hoàn toàn trống, xóa bỏ sách mẫu mặc định cũ nếu có trong localStorage
+        if (!localStorage.getItem('booknest_cart_cleared_default')) {
+            cart = [];
+            localStorage.setItem('booknest_cart', JSON.stringify([]));
+            localStorage.setItem('booknest_cart_cleared_default', 'true');
         }
 
         function renderBestsellers() {
@@ -649,16 +643,23 @@
             closeAllModals();
             const errBox = document.getElementById('cartErrorMsg');
             if (errBox) { errBox.style.display = 'none'; }
+            const tipMsg = document.getElementById('cartTipMsg');
             const list = document.getElementById('cartItemsList');
-            if(!cart || cart.length === 0 || !cart.find(c => c.id === 11)) {
-                if (!cart) cart = [];
-                cart = [
-                    { id: 11, name: "Tiếng Anh Lớp 1", price: 22000, qty: 3, img: getCoverUrl("Tiếng Anh Lớp 1"), category: "Tiếng Anh", cssClass: "cat-tienganh" },
-                    ...cart.filter(c => c.id !== 11)
-                ];
-                saveCart();
+
+            if (!cart || cart.length === 0) {
+                if (tipMsg) tipMsg.style.display = 'none';
+                list.innerHTML = `
+                    <div style="text-align: center; padding: 40px 16px; color: #64748b;">
+                        <span style="font-size: 48px; display: block; margin-bottom: 12px;">🛒</span>
+                        <div style="font-weight: 700; font-size: 16px; color: #1e293b; margin-bottom: 4px;">Giỏ hàng của bạn đang trống</div>
+                        <div style="font-size: 13px;">Hãy chọn các cuốn sách yêu thích để thêm vào giỏ nhé!</div>
+                    </div>`;
+                document.getElementById('cartTotalPrice').innerText = '0đ';
+                document.getElementById('cartModal').style.display = 'flex';
+                return;
             }
 
+            if (tipMsg) tipMsg.style.display = 'block';
             list.innerHTML = cart.map(item => {
                 const book = bookDatabase.find(b => b.id === item.id);
                 const bookStock = book ? ((book.stock !== undefined) ? book.stock : 50) : 0;
@@ -1722,14 +1723,6 @@ private:
         function initApp() {
             initDatabase();
             renderBestsellers();
-            if (!cart || cart.length === 0 || !cart.find(c => c.id === 11)) {
-                if (!cart) cart = [];
-                cart = [
-                    { id: 11, name: "Tiếng Anh Lớp 1", price: 22000, qty: 3, img: getCoverUrl("Tiếng Anh Lớp 1"), category: "Tiếng Anh", cssClass: "cat-tienganh" },
-                    ...cart.filter(c => c.id !== 11)
-                ];
-                saveCart();
-            }
             updateCartBadge();
             executeSearch();
             updateUserHeaderUI();
